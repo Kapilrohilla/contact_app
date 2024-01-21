@@ -22,7 +22,7 @@ export default function AllContact() {
             message: 'This app is like to read you mobile number',
             buttonPositive: 'Ok',
           }).then(res => {
-            console.log('request: ' + res);
+            // console.log('request: ' + res);
             if (res === 'never_ask_again' || res === 'denied') {
               ToastAndroid.showWithGravity(
                 'Contact Permission is required to work properly',
@@ -42,7 +42,7 @@ export default function AllContact() {
           setIsContactPermissionGranted(true);
 
           Contacts.getAll().then((contacts: TypeContact[]) => {
-            console.log(contacts);
+            // console.log(contacts);
             setContacts(contacts);
           });
         }

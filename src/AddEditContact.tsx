@@ -1,9 +1,10 @@
 import {View, Text, TextInput, Pressable, Image, TouchableOpacity, ScrollView} from 'react-native';
 import React, {useState} from 'react';
+import {addContact} from 'react-native-contacts';
 import type {Contact} from 'react-native-contacts';
 
 export default function AddEditContact({navigation, route}: {navigation: any; route: any}) {
-  const pageRole: string = route.params.role;
+  const pageRole: 'Add' | 'Edit' = route.params.role;
   const contactDetail: Contact = route.params?.contact;
   let prevName: string = contactDetail?.displayName || '';
   let prevPhone: string = contactDetail?.phoneNumbers[0]?.number || '';
@@ -18,12 +19,31 @@ export default function AddEditContact({navigation, route}: {navigation: any; ro
     } else if (prevPhone[0] === '+') {
       prevPhone = prevPhone.slice(1);
     }
-    console.log(prevPhone, 1);
+    // console.log(prevPhone, 1);
   }
 
   const [name, setName] = useState(prevName);
   const [phone, setPhone] = useState(prevPhone);
 
+  const handleSubmit = async () => {
+    const finalContactForm = {
+      givenName: name,
+      phoneNumbers: [
+        {
+          label: 'mobile',
+          number: phone,
+        },
+      ],
+    };
+    if (pageRole === 'Add') {
+      if (name && phone) {
+        const newContact = await addContact(finalContactForm);
+        console.log(newContact, 0);
+      }
+    } else {
+      return;
+    }
+  };
   return (
     <>
       <View
@@ -50,7 +70,7 @@ export default function AddEditContact({navigation, route}: {navigation: any; ro
           </Pressable>
           <Text style={{fontWeight: '500', fontSize: 20, color: 'black'}}>{pageRole}</Text>
         </View>
-        <TouchableOpacity onPress={() => {}}>
+        <TouchableOpacity onPress={handleSubmit}>
           <Image
             source={require('./assets/check.png')}
             style={{height: 20, width: 20, marginRight: 10}}
