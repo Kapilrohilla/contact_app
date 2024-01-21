@@ -1,5 +1,16 @@
-import {View, Text, Pressable, Image, TouchableOpacity, ScrollView, Linking} from 'react-native';
+import {
+  View,
+  Text,
+  Pressable,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  Linking,
+  ToastAndroid,
+  Vibration,
+} from 'react-native';
 import React from 'react';
+import Clipboard from '@react-native-clipboard/clipboard';
 import type {Contact as TypeContact} from 'react-native-contacts';
 
 type specificContactNavProps = {
@@ -9,6 +20,13 @@ type specificContactNavProps = {
 export default function SpecificContact({navigation, route}: specificContactNavProps) {
   const contact: TypeContact = route.params.contact;
   const image2display = contact.hasThumbnail ? {uri: contact.thumbnailPath} : require('./assets/user.png');
+  const mobileNum = contact.phoneNumbers[0]?.number;
+  const name = contact.displayName;
+  const copyNumber = () => {
+    Clipboard.setString(mobileNum);
+    ToastAndroid.showWithGravity(`${mobileNum} copied`, ToastAndroid.SHORT, ToastAndroid.BOTTOM);
+    Vibration.vibrate(50, false);
+  };
   return (
     <ScrollView>
       {/* TopBar */}
@@ -57,11 +75,13 @@ export default function SpecificContact({navigation, route}: specificContactNavP
           </View>
           {/* <Image source={image2display} style={{height: 150, width: 150, borderRadius: 75}} /> */}
         </View>
-        <Text style={{textAlign: 'center', color: '#000', fontSize: 22, fontWeight: '500'}}>{contact.displayName}</Text>
+        <Text style={{textAlign: 'center', color: '#000', fontSize: 22, fontWeight: '500'}}>{name}</Text>
         <View style={{marginHorizontal: 15}}>
           <View
             style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 36}}>
-            <Text style={{color: '#000', fontWeight: '500', fontSize: 16}}>{contact.phoneNumbers[0]?.number}</Text>
+            <Pressable onLongPress={copyNumber}>
+              <Text style={{color: '#000', fontWeight: '500', fontSize: 16}}>{mobileNum}</Text>
+            </Pressable>
             <View style={{flexDirection: 'row', gap: 10}}>
               <TouchableOpacity onPress={() => {}}>
                 <View
