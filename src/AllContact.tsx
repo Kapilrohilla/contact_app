@@ -1,16 +1,21 @@
 import {View, Text, FlatList, PermissionsAndroid, Linking, ToastAndroid} from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import Topbar from './Topbar';
+import NoContactFound from './components/NoContactFound';
+import Fab from './components/Fab';
+import Contact from './components/Contact';
+import Contacts from 'react-native-contacts';
+import type {Contact as TypeContact} from 'react-native-contacts';
 
 export default function AllContact() {
   const [isContactPermissionGranted, setIsContactPermissionGranted] = useState(false);
-
+  const [contacts, setContacts] = useState<TypeContact[]>([]);
+  const [searchString, setSearchString] = useState<String>('');
   const readContactPermission = () => {
     // checking if the permission is already granted or not
     PermissionsAndroid.check('android.permission.READ_CONTACTS')
       .then(r => {
-        if (r === false) {
-          console.log('check: ' + r);
+        if (!r) {
           // requesting READ-CONTACTS permission
           PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_CONTACTS, {
             title: 'Contacts',
@@ -35,6 +40,11 @@ export default function AllContact() {
         } else {
           ToastAndroid.showWithGravity(`Permission already granted`, 1000, ToastAndroid.BOTTOM);
           setIsContactPermissionGranted(true);
+
+          Contacts.getAll().then((contacts: TypeContact[]) => {
+            console.log(contacts);
+            setContacts(contacts);
+          });
         }
       })
       .catch(err => {
@@ -47,8 +57,21 @@ export default function AllContact() {
   }, []);
 
   return (
-    <View>
+    <View style={{flex: 1}}>
       <Topbar />
+      {(isContactPermissionGranted && contacts.length > 0) || <NoContactFound />}
+      {(isContactPermissionGranted || contacts.length > 0) && (
+        <View style={{paddingHorizontal: 20, marginTop: 20}}>
+          <FlatList
+            data={contacts}
+            renderItem={({item}) => {
+              return <Contact contactInfo={item} />;
+            }}
+            keyExtractor={(item: TypeContact) => item.recordID}
+          />
+        </View>
+      )}
+      <Fab />
     </View>
   );
 }
