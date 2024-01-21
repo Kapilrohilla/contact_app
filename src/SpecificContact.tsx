@@ -12,6 +12,9 @@ import {
 import React from 'react';
 import Clipboard from '@react-native-clipboard/clipboard';
 import type {Contact as TypeContact} from 'react-native-contacts';
+import {deleteContact} from 'react-native-contacts';
+import {removeContact} from './redux/slices/contactSlice';
+import {useDispatch} from 'react-redux';
 
 type specificContactNavProps = {
   route: any;
@@ -22,11 +25,27 @@ export default function SpecificContact({navigation, route}: specificContactNavP
   const image2display = contact.hasThumbnail ? {uri: contact.thumbnailPath} : require('./assets/user.png');
   const mobileNum = contact.phoneNumbers[0]?.number;
   const name = contact.displayName;
+  const currentRecordId = contact?.recordID;
   const copyNumber = () => {
     Clipboard.setString(mobileNum);
     ToastAndroid.showWithGravity(`${mobileNum} copied`, ToastAndroid.SHORT, ToastAndroid.BOTTOM);
     Vibration.vibrate(50, false);
   };
+
+  const dispatch = useDispatch();
+  const handleDeleteContact = async () => {
+    try {
+      //@ts-ignore
+      const response = await deleteContact({recordID: currentRecordId});
+      ToastAndroid.show('Contact delete successfully', 500);
+      // @ts-ignore
+      dispatch(removeContact(contact.recordID));
+      navigation.goBack();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
     <ScrollView>
       {/* TopBar */}
@@ -66,7 +85,7 @@ export default function SpecificContact({navigation, route}: specificContactNavP
             }}
           />
           <View style={{flexDirection: 'row', position: 'absolute', right: 20, top: 35, gap: 10}}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handleDeleteContact}>
               <Image source={require('./assets/delete.png')} style={{height: 24, width: 24, marginTop: 50}} />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate('addContact', {role: 'Edit', contact: contact})}>

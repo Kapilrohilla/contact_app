@@ -5,12 +5,15 @@ import type {Contact} from 'react-native-contacts';
 import {useDispatch} from 'react-redux';
 import {insertContact} from './redux/slices/contactSlice';
 import {useNavigation} from '@react-navigation/native';
+import type {fixContactPayload} from './redux/slices/contactSlice';
 
 export default function AddEditContact({navigation, route}: {navigation: any; route: any}) {
   const pageRole: 'Add' | 'Edit' = route.params.role;
   const contactDetail: Contact = route.params?.contact;
   let prevName: string = contactDetail?.displayName || '';
   let prevPhone: string = contactDetail?.phoneNumbers[0]?.number || '';
+  const mobileLabel = contactDetail?.phoneNumbers[0].label || '';
+  const currentRecordId = contactDetail?.recordID;
   const dispatch = useDispatch();
 
   if (prevPhone) {
@@ -25,9 +28,19 @@ export default function AddEditContact({navigation, route}: {navigation: any; ro
     }
     // console.log(prevPhone, 1);
   }
-
   const [name, setName] = useState(prevName);
   const [phone, setPhone] = useState(prevPhone);
+
+  const payloadData: fixContactPayload = {
+    recordID: currentRecordId,
+    updatedContact: {
+      name: name,
+      phone: {
+        label: mobileLabel,
+        number: phone,
+      },
+    },
+  };
 
   const handleSubmit = async () => {
     const finalContactForm = {
@@ -42,6 +55,7 @@ export default function AddEditContact({navigation, route}: {navigation: any; ro
     if (pageRole === 'Add') {
       if (name && phone) {
         const newContact = await addContact(finalContactForm);
+        // @ts-ignore
         dispatch(insertContact(newContact));
         ToastAndroid.show(`${phone} number saved successfully`, 1000);
         navigation.goBack();
