@@ -1,14 +1,19 @@
-import {View, Image, StyleSheet, Pressable} from 'react-native';
+import {View, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import React from 'react';
+import {useNavigation} from '@react-navigation/native';
 
 export default function Fab() {
+  const navigation = useNavigation();
   return (
-    <Pressable style={{position: 'absolute', bottom: 30, right: 40}}>
+    <TouchableOpacity
+      // @ts-ignore
+      onPress={() => navigation.navigate('addContact', {role: 'Add'})}
+      style={{position: 'absolute', bottom: 30, right: 40}}>
       <View style={styles.btn}>
         {/* <Text style={{color: '#000'}}>Fab</Text> */}
         <Image source={require('../assets/plus.png')} />
       </View>
-    </Pressable>
+    </TouchableOpacity>
   );
 }
 

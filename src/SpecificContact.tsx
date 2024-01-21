@@ -8,7 +8,6 @@ type specificContactNavProps = {
 };
 export default function SpecificContact({navigation, route}: specificContactNavProps) {
   const contact: TypeContact = route.params.contact;
-  console.log(route.params?.contact, 0);
   const image2display = contact.hasThumbnail ? {uri: contact.thumbnailPath} : require('./assets/user.png');
   return (
     <ScrollView>
@@ -52,7 +51,7 @@ export default function SpecificContact({navigation, route}: specificContactNavP
             <TouchableOpacity>
               <Image source={require('./assets/delete.png')} style={{height: 24, width: 24, marginTop: 50}} />
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('addContact', {role: 'Edit', contact: contact})}>
               <Image source={require('./assets/edit.png')} style={{height: 24, width: 24, marginTop: 50}} />
             </TouchableOpacity>
           </View>
