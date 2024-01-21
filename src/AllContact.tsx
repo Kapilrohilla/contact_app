@@ -10,7 +10,7 @@ import type {Contact as TypeContact} from 'react-native-contacts';
 export default function AllContact() {
   const [isContactPermissionGranted, setIsContactPermissionGranted] = useState(false);
   const [contacts, setContacts] = useState<TypeContact[]>([]);
-  const [searchString, setSearchString] = useState<String>('');
+  const [searchString, setSearchString] = useState<string>('');
   const readContactPermission = () => {
     // checking if the permission is already granted or not
     PermissionsAndroid.check('android.permission.READ_CONTACTS')
@@ -55,15 +55,17 @@ export default function AllContact() {
   useEffect(() => {
     readContactPermission();
   }, []);
-
+  const filteredData = searchString
+    ? contacts.filter(contact => new RegExp(searchString, 'i').test(contact.displayName))
+    : contacts;
   return (
     <View style={{flex: 1}}>
-      <Topbar />
+      <Topbar searchString={searchString} setSearchString={setSearchString} />
       {(isContactPermissionGranted && contacts.length > 0) || <NoContactFound />}
       {(isContactPermissionGranted || contacts.length > 0) && (
         <View style={{paddingHorizontal: 20, marginTop: 20}}>
           <FlatList
-            data={contacts}
+            data={filteredData}
             renderItem={({item}) => {
               return <Contact contactInfo={item} />;
             }}

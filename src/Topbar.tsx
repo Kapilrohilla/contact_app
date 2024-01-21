@@ -1,13 +1,26 @@
-import {View, Text, Image, Pressable, TextInput, Button, StyleSheet} from 'react-native';
+import {View, Text, Image, Pressable, TextInput, Button, StyleSheet, Dimensions} from 'react-native';
 import React, {useState} from 'react';
 import {Menu} from 'react-native-paper';
 
-export default function Topbar() {
+type TopBarProps = {
+  searchString: string;
+  setSearchString: React.Dispatch<string>;
+};
+
+export default function Topbar({searchString, setSearchString}: TopBarProps) {
   const [isSearching, setIsSearching] = useState(false);
-  const [searchString, setSearchString] = useState('');
   const [showMenu, setShowMenu] = useState(false);
+  const handleToggleSearch = () => {
+    if (isSearching) {
+      setIsSearching(false);
+      setSearchString('');
+    } else {
+      setIsSearching(true);
+    }
+  };
   return (
-    <View style={{height: 60, flexDirection: 'row', justifyContent: 'space-between', padding: 10, alignItems: 'center'}}>
+    <View
+      style={{height: 60, flexDirection: 'row', justifyContent: 'space-between', padding: 10, alignItems: 'center'}}>
       {isSearching ? (
         <View style={{flexDirection: 'row', alignItems: 'center', gap: 15}}>
           <Pressable onPress={() => setIsSearching(false)}>
@@ -15,18 +28,25 @@ export default function Topbar() {
           </Pressable>
           <TextInput
             value={searchString}
+            autoCapitalize="none"
+            autoFocus={true}
+            autoComplete="cc-name"
+            inputMode="search"
             onChangeText={setSearchString}
             placeholder="Search..."
             placeholderTextColor={'#00000088'}
-            style={{fontSize: 18, fontWeight: '500', padding: 0, color: '#00000088', paddingLeft: 2}}
+            style={styles.inputStyle}
           />
         </View>
       ) : (
         <Text style={{fontWeight: '500', fontSize: 20, color: 'black'}}>Contacts</Text>
       )}
       <View style={{flexDirection: 'row', gap: 10}}>
-        <Pressable onPress={() => setIsSearching(!isSearching)}>
-          <Image source={isSearching ? require('./assets/close.png') : require('./assets/search.png')} style={{height: 24, width: 24}} />
+        <Pressable onPress={handleToggleSearch}>
+          <Image
+            source={isSearching ? require('./assets/close.png') : require('./assets/search.png')}
+            style={{height: 24, width: 24}}
+          />
         </Pressable>
         <Menu
           style={styles.menuContainer}
@@ -54,5 +74,14 @@ const styles = StyleSheet.create({
   },
   menuItem: {
     backgroundColor: '#fff',
+  },
+  inputStyle: {
+    fontSize: 18,
+    fontWeight: '500',
+    padding: 0,
+    color: '#00000088',
+    paddingLeft: 2,
+    maxWidth: '70%',
+    width: '70%',
   },
 });
