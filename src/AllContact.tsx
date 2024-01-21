@@ -6,11 +6,18 @@ import Fab from './components/Fab';
 import Contact from './components/Contact';
 import Contacts from 'react-native-contacts';
 import type {Contact as TypeContact} from 'react-native-contacts';
+import {populateContact} from './redux/slices/contactSlice';
+import {useDispatch, useSelector} from 'react-redux';
 
 export default function AllContact() {
   const [isContactPermissionGranted, setIsContactPermissionGranted] = useState(false);
-  const [contacts, setContacts] = useState<TypeContact[]>([]);
+  // const [contacts, setContacts] = useState<TypeContact[]>([]);
   const [searchString, setSearchString] = useState<string>('');
+  // @ts-ignore
+  const contacts: Contact[] = useSelector(state => state?.contacts);
+
+  const dispatch = useDispatch();
+
   const readContactPermission = () => {
     // checking if the permission is already granted or not
     PermissionsAndroid.check('android.permission.READ_CONTACTS')
@@ -42,8 +49,8 @@ export default function AllContact() {
           setIsContactPermissionGranted(true);
 
           Contacts.getAll().then((contacts: TypeContact[]) => {
-            // console.log(contacts);
-            setContacts(contacts);
+            dispatch(populateContact(contacts));
+            // setContacts(contacts);
           });
         }
       })
@@ -55,9 +62,11 @@ export default function AllContact() {
   useEffect(() => {
     readContactPermission();
   }, []);
+
   const filteredData = searchString
     ? contacts.filter(contact => new RegExp(searchString, 'i').test(contact.displayName))
     : contacts;
+
   return (
     <View style={{flex: 1}}>
       <Topbar searchString={searchString} setSearchString={setSearchString} />

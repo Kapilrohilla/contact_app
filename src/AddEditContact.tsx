@@ -1,13 +1,17 @@
-import {View, Text, TextInput, Pressable, Image, TouchableOpacity, ScrollView} from 'react-native';
+import {View, Text, TextInput, Pressable, Image, TouchableOpacity, ScrollView, ToastAndroid} from 'react-native';
 import React, {useState} from 'react';
 import {addContact} from 'react-native-contacts';
 import type {Contact} from 'react-native-contacts';
+import {useDispatch} from 'react-redux';
+import {insertContact} from './redux/slices/contactSlice';
+import {useNavigation} from '@react-navigation/native';
 
 export default function AddEditContact({navigation, route}: {navigation: any; route: any}) {
   const pageRole: 'Add' | 'Edit' = route.params.role;
   const contactDetail: Contact = route.params?.contact;
   let prevName: string = contactDetail?.displayName || '';
   let prevPhone: string = contactDetail?.phoneNumbers[0]?.number || '';
+  const dispatch = useDispatch();
 
   if (prevPhone) {
     // replacing spaces from number
@@ -38,7 +42,9 @@ export default function AddEditContact({navigation, route}: {navigation: any; ro
     if (pageRole === 'Add') {
       if (name && phone) {
         const newContact = await addContact(finalContactForm);
-        console.log(newContact, 0);
+        dispatch(insertContact(newContact));
+        ToastAndroid.show(`${phone} number saved successfully`, 1000);
+        navigation.goBack();
       }
     } else {
       return;
