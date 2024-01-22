@@ -1,5 +1,5 @@
 import {createSlice} from '@reduxjs/toolkit';
-import type {Contact, PhoneNumber} from 'react-native-contacts';
+import {updateContact, type Contact, type PhoneNumber} from 'react-native-contacts';
 
 export type fixContactPayload = {
   recordID: string;
@@ -34,37 +34,38 @@ const contactSlice = createSlice({
       });
       return removeContact4ById;
     },
-    // @ts-expect-error
+
     fixContact(state, action: FixContactActionType) {
       const recordid = action.payload.recordID;
       const name = action.payload.updatedContact.name;
       const phone: PhoneNumber = action.payload.updatedContact.phone;
 
-      const updatedState = state.map((contact: Contact) => {
+      state.forEach((contact: Contact) => {
         if (contact.recordID === recordid) {
           let selectedContact = contact;
           selectedContact.givenName = name;
+          selectedContact.displayName = name;
 
           const updatedPhone = selectedContact.phoneNumbers.map(phoneObj => {
             if ((phoneObj.label = phone.label)) {
               phoneObj.number = phone.number;
               return phoneObj;
             } else {
-              phoneObj;
+              return phoneObj;
             }
           });
           // return updatedPhone;
           // @ts-ignore
-          contact.phoneNumbers = updatedPhone;
-          return contact;
+          selectedContact.phoneNumbers = updatedPhone;
+          // console.log(JSON.stringify(selectedContact), '<<-- selected');
+          // return selectedContact;
         } else {
-          return contact;
         }
       });
-      return updatedState;
+      return state;
     },
   },
 });
 
 export default contactSlice;
-export const {populateContact, getContact, insertContact, removeContact} = contactSlice.actions;
+export const {populateContact, getContact, insertContact, removeContact, fixContact} = contactSlice.actions;

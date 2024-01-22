@@ -1,11 +1,11 @@
 import {View, Text, TextInput, Pressable, Image, TouchableOpacity, ScrollView, ToastAndroid} from 'react-native';
 import React, {useState} from 'react';
-import {addContact} from 'react-native-contacts';
+import {addContact, editExistingContact, getAll, updateContact} from 'react-native-contacts';
 import type {Contact} from 'react-native-contacts';
 import {useDispatch} from 'react-redux';
-import {insertContact} from './redux/slices/contactSlice';
-import {useNavigation} from '@react-navigation/native';
+import {fixContact, insertContact} from './redux/slices/contactSlice';
 import type {fixContactPayload} from './redux/slices/contactSlice';
+import SendIntentAndroid from 'react-native-send-intent';
 
 export default function AddEditContact({navigation, route}: {navigation: any; route: any}) {
   const pageRole: 'Add' | 'Edit' = route.params.role;
@@ -31,17 +31,6 @@ export default function AddEditContact({navigation, route}: {navigation: any; ro
   const [name, setName] = useState(prevName);
   const [phone, setPhone] = useState(prevPhone);
 
-  const payloadData: fixContactPayload = {
-    recordID: currentRecordId,
-    updatedContact: {
-      name: name,
-      phone: {
-        label: mobileLabel,
-        number: phone,
-      },
-    },
-  };
-
   const handleSubmit = async () => {
     const finalContactForm = {
       givenName: name,
@@ -61,6 +50,34 @@ export default function AddEditContact({navigation, route}: {navigation: any; ro
         navigation.goBack();
       }
     } else {
+      const payloadData: fixContactPayload = {
+        recordID: currentRecordId,
+        updatedContact: {
+          name: name,
+          phone: {
+            label: mobileLabel,
+            number: phone,
+          },
+        },
+      };
+
+      dispatch(fixContact(payloadData));
+      const newContact: Contact = {
+        ...contactDetail,
+        ...payloadData.updatedContact,
+      };
+      console.log(newContact);
+      try {
+        const response = await editExistingContact(newContact);
+        console.log(response, '<< -- updated response');
+        navigation.goBack();
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          console.warn(err.message);
+        } else {
+          console.error(err);
+        }
+      }
       return;
     }
   };

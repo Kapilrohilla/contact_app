@@ -116,7 +116,10 @@ export default function SpecificContact({navigation, route}: specificContactNavP
                   <Image source={require('./assets/call-white.png')} style={{height: 25, width: 25}} />
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => {}}>
+              <TouchableOpacity
+                onPress={() => {
+                  Linking.openURL(`sms:${mobileNum}`);
+                }}>
                 <View
                   style={{
                     flexDirection: 'row',
