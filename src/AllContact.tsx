@@ -1,5 +1,5 @@
 import {View, Text, FlatList, PermissionsAndroid, Linking, ToastAndroid} from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {Suspense, useEffect, useState} from 'react';
 import Topbar from './Topbar';
 import NoContactFound from './components/NoContactFound';
 import Fab from './components/Fab';
@@ -58,9 +58,29 @@ export default function AllContact() {
         console.log(err);
       });
   };
-
+  const callingPermission = () => {
+    PermissionsAndroid.check('android.permission.CALL_PHONE')
+      .then(r => {
+        if (!r) {
+          PermissionsAndroid.request('android.permission.CALL_PHONE').then(r => {
+            if (r === 'denied' || r === 'never_ask_again') {
+              ToastAndroid.show('Calling feature can be enabled by allowing the permission', 500);
+            } else {
+              ToastAndroid.show('PhoneCall Permission granted', 500);
+            }
+          });
+        } else {
+          ToastAndroid.showWithGravity(`PhoneCall Permission granted`, 1000, ToastAndroid.BOTTOM);
+          setIsContactPermissionGranted(true);
+        }
+      })
+      .catch((err: unknown) => {
+        if (err instanceof Error) console.log(err.message);
+      });
+  };
   useEffect(() => {
     readContactPermission();
+    callingPermission();
   }, []);
 
   const filteredData = searchString
@@ -73,13 +93,17 @@ export default function AllContact() {
       {(isContactPermissionGranted && contacts.length > 0) || <NoContactFound />}
       {(isContactPermissionGranted || contacts.length > 0) && (
         <View style={{paddingHorizontal: 20, marginTop: 20}}>
-          <FlatList
-            data={filteredData}
-            renderItem={({item}) => {
-              return <Contact contactInfo={item} />;
-            }}
-            keyExtractor={(item: TypeContact) => item.recordID}
-          />
+          {
+            <Suspense fallback={<Text style={{fontSize: 20, color: '#000'}}>Scanning...</Text>}>
+              <FlatList
+                data={filteredData}
+                renderItem={({item}) => {
+                  return <Contact contactInfo={item} />;
+                }}
+                keyExtractor={(item: TypeContact) => item.recordID}
+              />
+            </Suspense>
+          }
         </View>
       )}
       <Fab />

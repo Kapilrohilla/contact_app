@@ -8,7 +8,7 @@ export default function Fab() {
     <TouchableOpacity
       // @ts-ignore
       onPress={() => navigation.navigate('addContact', {role: 'Add'})}
-      style={{position: 'absolute', bottom: 30, right: 40}}>
+      style={{position: 'absolute', bottom: 30, right: 60}}>
       <View style={styles.btn}>
         {/* <Text style={{color: '#000'}}>Fab</Text> */}
         <Image source={require('../assets/plus.png')} />

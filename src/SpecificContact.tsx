@@ -15,6 +15,7 @@ import type {Contact as TypeContact} from 'react-native-contacts';
 import {deleteContact} from 'react-native-contacts';
 import {removeContact} from './redux/slices/contactSlice';
 import {useDispatch} from 'react-redux';
+import SendIntentAndroid from 'react-native-send-intent';
 
 type specificContactNavProps = {
   route: any;
@@ -45,7 +46,13 @@ export default function SpecificContact({navigation, route}: specificContactNavP
       console.log(err);
     }
   };
-
+  const handlePhoneCall = () => {
+    ToastAndroid.show(`Calling to ${name}`, 1000);
+    Vibration.vibrate(100, false);
+    setTimeout(() => {
+      SendIntentAndroid.sendPhoneCall(mobileNum, true);
+    }, 1000);
+  };
   return (
     <ScrollView>
       {/* TopBar */}
@@ -102,7 +109,7 @@ export default function SpecificContact({navigation, route}: specificContactNavP
               <Text style={{color: '#000', fontWeight: '500', fontSize: 16}}>{mobileNum}</Text>
             </Pressable>
             <View style={{flexDirection: 'row', gap: 10}}>
-              <TouchableOpacity onPress={() => {}}>
+              <TouchableOpacity onPress={handlePhoneCall}>
                 <View
                   style={{
                     flexDirection: 'row',
