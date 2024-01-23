@@ -1,5 +1,5 @@
 import {View, Text, Image, Pressable, TextInput, Button, StyleSheet, Dimensions} from 'react-native';
-import React, {useState} from 'react';
+import React, {memo, useState} from 'react';
 import {Menu} from 'react-native-paper';
 
 type TopBarProps = {
@@ -8,11 +8,13 @@ type TopBarProps = {
 };
 
 export default function Topbar({searchString, setSearchString}: TopBarProps) {
+  
   const [isSearching, setIsSearching] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const handleToggleSearch = () => {
+    console.log('toggling');
     if (isSearching) {
-      setIsSearching(false);
+      // setIsSearching(false);
       setSearchString('');
     } else {
       setIsSearching(true);
@@ -23,7 +25,11 @@ export default function Topbar({searchString, setSearchString}: TopBarProps) {
       style={{height: 60, flexDirection: 'row', justifyContent: 'space-between', padding: 10, alignItems: 'center'}}>
       {isSearching ? (
         <View style={{flexDirection: 'row', alignItems: 'center', gap: 15}}>
-          <Pressable onPress={() => setIsSearching(false)}>
+          <Pressable
+            onPress={() => {
+              setIsSearching(false);
+              setSearchString('');
+            }}>
             <Image source={require('./assets/arrow_back_ios.png')} style={{height: 24, width: 24}} />
           </Pressable>
           <TextInput
@@ -48,13 +54,14 @@ export default function Topbar({searchString, setSearchString}: TopBarProps) {
             style={{height: 24, width: 24}}
           />
         </Pressable>
-        <Menu
+        <MenuPopup showMenu={showMenu} setShowMenu={setShowMenu} />
+        {/* <Menu
           style={styles.menuContainer}
           visible={showMenu}
           onDismiss={() => setShowMenu(false)}
           anchor={<MenuAnchorBtn setShowMenu={setShowMenu} />}>
           <Menu.Item title="Sort" onPress={() => {}} />
-        </Menu>
+        </Menu> */}
       </View>
     </View>
   );
@@ -84,4 +91,16 @@ const styles = StyleSheet.create({
     maxWidth: '70%',
     width: '70%',
   },
+});
+
+const MenuPopup = memo(({showMenu, setShowMenu}: {showMenu: boolean; setShowMenu: React.Dispatch<boolean>}) => {
+  return (
+    <Menu
+      style={styles.menuContainer}
+      visible={showMenu}
+      onDismiss={() => setShowMenu(false)}
+      anchor={<MenuAnchorBtn setShowMenu={setShowMenu} />}>
+      <Menu.Item title="Sort" onPress={() => {}} />
+    </Menu>
+  );
 });

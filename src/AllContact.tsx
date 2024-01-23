@@ -1,5 +1,5 @@
 import {View, Text, FlatList, PermissionsAndroid, Linking, ToastAndroid} from 'react-native';
-import React, {Suspense, useEffect, useState} from 'react';
+import React, {Suspense, useEffect, useMemo, useState} from 'react';
 import Topbar from './Topbar';
 import NoContactFound from './components/NoContactFound';
 import Fab from './components/Fab';
@@ -8,6 +8,7 @@ import Contacts from 'react-native-contacts';
 import type {Contact as TypeContact} from 'react-native-contacts';
 import {populateContact} from './redux/slices/contactSlice';
 import {useDispatch, useSelector} from 'react-redux';
+import {FlashList} from '@shopify/flash-list';
 
 export default function AllContact() {
   const [isContactPermissionGranted, setIsContactPermissionGranted] = useState(false);
@@ -83,19 +84,22 @@ export default function AllContact() {
     callingPermission();
   }, []);
 
-  const filteredData = searchString
-    ? contacts.filter(contact => new RegExp(searchString, 'i').test(contact.displayName))
-    : contacts;
+  const filteredData = useMemo(
+    () =>
+      searchString ? contacts.filter(contact => new RegExp(searchString, 'i').test(contact.displayName)) : contacts,
+    [searchString, contacts],
+  );
 
   return (
     <View style={{flex: 1}}>
       <Topbar searchString={searchString} setSearchString={setSearchString} />
       {(isContactPermissionGranted && contacts.length > 0) || <NoContactFound />}
-      {(isContactPermissionGranted || contacts.length > 0) && (
-        <View style={{paddingHorizontal: 20, marginTop: 20}}>
+      {isContactPermissionGranted && contacts.length > 0 && (
+        <View style={{paddingHorizontal: 20, marginTop: 20, flex: 1}}>
           {
             <Suspense fallback={<Text style={{fontSize: 20, color: '#000'}}>Scanning...</Text>}>
-              <FlatList
+              <FlashList
+                estimatedItemSize={200}
                 data={filteredData}
                 renderItem={({item}) => {
                   return <Contact contactInfo={item} />;
